@@ -1,0 +1,73 @@
+* {
+    box-sizing: border-box;
+}
+
+.page {
+    background: #cfd0cf;
+    font-family: Arial, sans-serif;
+}
+.page__header {
+    line-height: 47px;
+    font-size: 42px;
+    margin-top: 40px;
+    text-align: center;
+    font-weight: bold;
+    color: #434344;
+}
+.page__main {
+    display: grid;
+    grid-gap: 25px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    width: 595px;
+    margin-left: auto;
+    margin-right: auto;
+    perspective: 600px;
+}
+.main__card {
+    width: 130px;
+    height: 130px;
+}
+.card {
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+    font-size: 72px;
+    position: relative;
+    border-radius: 9px;
+    transform-style: preserve-3d;
+    transition: transform .5s;
+    cursor: pointer;
+}
+.card__back {
+    background: linear-gradient(45deg, #22ab93, #19668d);
+    border: 5px solid #fff;
+    border-radius: 9px;
+}
+.card__face {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotateY(180deg);
+    z-index: -1;
+    background-color: #fff;
+    border-radius: 9px;
+}
+.card__back,
+.card__face {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+}
+.card--flipped {
+    transform: rotateY(180deg);
+    cursor: default;
+}
+.card--matched .card__face{
+    background-color: limegreen;
+}
+.card--missed .card__face{
+    background-color: palevioletred;
+}
