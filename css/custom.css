@@ -5,19 +5,21 @@
 .page {
     background: #cfd0cf;
     font-family: Arial, sans-serif;
-}
-.page__header {
-    line-height: 47px;
-    font-size: 42px;
-    margin-top: 40px;
-    text-align: center;
-    font-weight: bold;
     color: #434344;
 }
-.page__main {
+.page__header {
+    margin-top: 40px;
+}
+.header {
+    line-height: 47px;
+    font-size: 42px;
+    text-align: center;
+    font-weight: bold;
+}
+.playfield {
     display: grid;
     grid-gap: 25px;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 130px );
     flex-wrap: wrap;
     margin-top: 40px;
     width: 595px;
@@ -25,11 +27,8 @@
     margin-right: auto;
     perspective: 600px;
 }
-.main__card {
-    width: 130px;
-    height: 130px;
-}
 .card {
+    height: 130px;
     box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
     font-size: 72px;
     position: relative;
@@ -37,6 +36,10 @@
     transform-style: preserve-3d;
     transition: transform .5s;
     cursor: pointer;
+}
+.card:focus {
+    outline: 0;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, .5), 0 0 0 3px rgba(16, 78, 189, .5)
 }
 .card__back {
     background: linear-gradient(45deg, #22ab93, #19668d);
@@ -51,6 +54,7 @@
     z-index: -1;
     background-color: #fff;
     border-radius: 9px;
+    user-select: none;
 }
 .card__back,
 .card__face {
@@ -65,9 +69,56 @@
     transform: rotateY(180deg);
     cursor: default;
 }
-.card--matched .card__face{
-    background-color: limegreen;
+.card--matched .card__face {
+    background-color: #5ad66f;
 }
-.card--missed .card__face{
-    background-color: palevioletred;
+.card--missed .card__face {
+    background-color: #f44336;
+}
+.main__timer {
+    margin-top: 30px;
+ }
+.timer {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    line-height: 36px;
+}
+.overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+}
+.popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 350px;
+    padding: 30px;
+    background-color: white;
+    text-align: center;
+}
+.popup__text {
+    font-size: 48px;
+}
+.popup__button {
+    margin-top: 40px;
+    height: 40px;
+    font-size: 20px;
+    padding: 10px 30px;
+    background: linear-gradient(#22ab93, #19668d);
+    color: #fff;
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+    border-radius: 9px;
+    font-weight: bold;
+
+    border: 0;
+
+}
+.popup__button:active {
+    box-shadow: inset 2px 1px 8px rgba(0,0,0,0.5);
 }
