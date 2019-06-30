@@ -1,35 +1,45 @@
 function createGame({playFieldWrap, gameTime}) {
     const main = document.querySelector(playFieldWrap);
-    const emojisWithDoubles = playElems(['🐹', '🐰', '🐭', '🐻', '🐱', '🐶']);
-    const cards = Array.from(document.querySelectorAll('.card'));
 
     const timerStartEvent = new CustomEvent('timerStart');
     const winPopupEvent = new CustomEvent('winPopup');
     const losePopupEvent = new CustomEvent('losePopup');
+    const emojisWithDoubles = playElems(['🐹', '🐰', '🐭', '🐻', '🐱', '🐶']);
 
     let isGameRunning = false;
     let flippedCard = null;
 
+
     createField(emojisWithDoubles);
     createTimer();
 
+    const cards = Array.from(document.querySelectorAll('.card'));
+
     main.addEventListener('timerStart', () => runTimer(gameTime));
-    main.addEventListener('winPopup', () => endgamePop('popup__win', 'You win'));
-    main.addEventListener('losePopup', () => endgamePop('popup__lose', 'You lose'));
+    main.addEventListener('winPopup', () => endgamePop('popup__win', 'Win'));
+    main.addEventListener('losePopup', () => endgamePop('popup__lose', 'Lose'));
 
     main.addEventListener('click', cardFlip);
     main.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' || e.key === ' ') cardFlip(e);
     });
 
+    function playElems(arr) {
+        const elems = Array.from(new Set(arr));
+        const elemsWithDoubles = elems.concat(elems);
+
+        elemsWithDoubles.sort(() => Math.random() - 0.5);
+        return elemsWithDoubles;
+    }
+
     function cardFlip(event) {
         const target = event.target;
         const card = target.classList.contains('card') ? target : target.closest('.card');
 
-        if (!card) return;
+        if (!card || card.classList.contains('card--flipped')) return;
 
-        if (card.classList.contains('card--flipped')) return;
 
+        // First flip
         if (!isGameRunning) {
             isGameRunning = true;
             main.dispatchEvent(timerStartEvent);
@@ -69,15 +79,7 @@ function createGame({playFieldWrap, gameTime}) {
     function similarityCheck(firstCard, secondCard) {
         return firstCard.innerText.trim() === secondCard.innerText.trim();
     }
-    
-    function playElems(arr) {
-        const elems = Array.from(new Set(arr));
-        const elemsWithDoubles = elems.concat(elems);
 
-        elemsWithDoubles.sort(() => Math.random() - 0.5);
-        return elemsWithDoubles;
-    }
-    
     function createCard(cardText) {
         const card = document.createElement('div');
         const cardFace = document.createElement('div');
@@ -151,6 +153,8 @@ function createGame({playFieldWrap, gameTime}) {
     }
 
     function endgamePop(extraClass, text) {
+        const textLetters = text.split('');
+
         const overlay = document.createElement('div');
         const popupBlock = document.createElement('div');
         const popupText = document.createElement('div');
@@ -164,8 +168,14 @@ function createGame({playFieldWrap, gameTime}) {
         popupBlock.classList.add('popup', extraClass);
 
         popupText.classList.add('popup__text');
-        popupText.textContent = text;
         popupBlock.append(popupText);
+
+        textLetters.forEach(letter => {
+            const popupLetter = document.createElement('span');
+            popupLetter.classList.add('popup__letter');
+            popupLetter.textContent = letter;
+            popupText.append(popupLetter);
+        });
 
         popupButton.classList.add('popup__button', 'button', 'js-replay');
         popupButton.textContent = 'Play again';
