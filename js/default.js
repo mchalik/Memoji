@@ -1,16 +1,17 @@
-function createGame({playFieldWrap, gameTime}) {
+'use strict';
+
+function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
     const main = document.querySelector(playFieldWrap);
 
     const timerStartEvent = new CustomEvent('timerStart');
     const winPopupEvent = new CustomEvent('winPopup');
     const losePopupEvent = new CustomEvent('losePopup');
-    const emojisWithDoubles = playElems(['🐹', '🐰', '🐭', '🐻', '🐱', '🐶']);
 
     let isGameRunning = false;
     let flippedCard = null;
 
 
-    createField(emojisWithDoubles);
+    createField(elemsToShuffleLength);
     createTimer();
 
     const cards = Array.from(document.querySelectorAll('.card'));
@@ -21,14 +22,6 @@ function createGame({playFieldWrap, gameTime}) {
 
     main.addEventListener('click', cardFlip);
     main.addEventListener('keypress', keyboardFlip);
-
-    function playElems(arr) {
-        const elems = Array.from(new Set(arr));
-        const elemsWithDoubles = elems.concat(elems);
-
-        elemsWithDoubles.sort(() => Math.random() - 0.5);
-        return elemsWithDoubles;
-    }
 
 
     function cardFlip(event) {
@@ -83,12 +76,12 @@ function createGame({playFieldWrap, gameTime}) {
         if (event.key === 'Enter' || event.key === ' ') cardFlip(e);
     }
 
-    function createField(elems) {
+    function createField(length) {
         const playField = document.createElement('div');
 
         playField.classList.add('playfield');
         main.append(playField);
-        elems.forEach((elem) => {
+        playElems().forEach((elem) => {
             playField.append(createCard(elem));
         });
 
@@ -108,6 +101,18 @@ function createGame({playFieldWrap, gameTime}) {
             card.append(cardBack);
 
             return card;
+        }
+
+
+
+        function playElems() {
+            const allEmojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙', '🐵', '🦄', '🐞', '🦀', '🐟', '🐊', '🐓', '🦃'];
+            const arr = allEmojis.sort(() => Math.random() - 0.5).slice(0,length);
+            const elems = Array.from(new Set(arr));
+            const elemsWithDoubles = elems.concat(elems);
+
+            elemsWithDoubles.sort(() => Math.random() - 0.5);
+            return elemsWithDoubles;
         }
     }
 
@@ -192,17 +197,20 @@ function createGame({playFieldWrap, gameTime}) {
             const mainClone = main.cloneNode(false);
             const flippedCards = cards.filter(card => card.classList.contains('card--flipped'));
 
+            Promise.all(flippedCards.map(card => new Promise(resolve => {
+                card.addEventListener('transitionend', resolve);
+            })))
+                .then(updateField);
+
             overlay.remove();
-
-            flippedCards[0].addEventListener('transitionend', updateField);
-
             flippedCards.forEach(card => {
                 card.classList.remove('card--flipped');
             });
 
             function updateField() {
                 main.parentElement.replaceChild(mainClone, main);
-                createGame({playFieldWrap: playFieldWrap, gameTime: gameTime});
+                // createField(elemsToShuffleLength);
+                createGame({playFieldWrap, gameTime, elemsToShuffleLength})
             }
         }
     }
