@@ -51,6 +51,11 @@
     background: linear-gradient(45deg, #22ab93, #19668d);
     border: 5px solid #fff;
     border-radius: 9px;
+    transition: background-size .1s;
+}
+
+.card__back:hover {
+    background-size: 140%;
 }
 
 .card__face {

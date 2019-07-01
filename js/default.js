@@ -17,8 +17,8 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
     const cards = Array.from(document.querySelectorAll('.card'));
 
     main.addEventListener('timerStart', () => runTimer(gameTime));
-    main.addEventListener('winPopup', () => endgamePop('popup__win', 'Win'));
-    main.addEventListener('losePopup', () => endgamePop('popup__lose', 'Lose'));
+    main.addEventListener('winPopup', () => endgamePop('popup__win', 'Win', 'Play again'));
+    main.addEventListener('losePopup', () => endgamePop('popup__lose', 'Lose', 'Try Again'));
 
     main.addEventListener('click', cardFlip);
     main.addEventListener('keypress', keyboardFlip);
@@ -29,7 +29,6 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
         const card = target.classList.contains('card') ? target : target.closest('.card');
 
         if (!card || card.classList.contains('card--flipped')) return;
-
 
         // First flip
         if (!isGameRunning) {
@@ -73,7 +72,7 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
     }
 
     function keyboardFlip(event) {
-        if (event.key === 'Enter' || event.key === ' ') cardFlip(e);
+        if (event.key === 'Enter' || event.key === ' ') cardFlip(event);
     }
 
     function createField(length) {
@@ -91,24 +90,22 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
             const cardBack = document.createElement('div');
 
             card.classList.add('main__card', 'card');
+            cardFace.classList.add('card__face');
+            cardBack.classList.add('card__back');
+
             card.tabIndex = 0;
 
-            cardFace.classList.add('card__face');
-            cardFace.append(cardText);
             card.append(cardFace);
-
-            cardBack.classList.add('card__back');
             card.append(cardBack);
+            cardFace.append(cardText);
 
             return card;
         }
 
-
-
         function playElems() {
             const allEmojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙', '🐵', '🦄', '🐞', '🦀', '🐟', '🐊', '🐓', '🦃'];
-            const arr = allEmojis.sort(() => Math.random() - 0.5).slice(0,length);
-            const elems = Array.from(new Set(arr));
+            const randomDouble = allEmojis.sort(() => Math.random() - 0.5).slice(0,length);
+            const elems = Array.from(new Set(randomDouble));
             const elemsWithDoubles = elems.concat(elems);
 
             elemsWithDoubles.sort(() => Math.random() - 0.5);
@@ -136,12 +133,6 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
             // | 0 is replace for ParseInt
             diff = duration - (((Date.now() - start) / 1000 ) | 0);
 
-            //Win sequence
-            if (!isGameRunning) {
-                clearInterval(timerInterval);
-                return;
-            }
-
             minutes = (diff / 60) | 0;
             seconds = (diff % 60) | 0;
 
@@ -158,10 +149,11 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
 
         timer();
         const timerInterval = setInterval(timer, 1000);
+        main.addEventListener('winPopup', () => clearInterval(timerInterval));
     }
 
-    function endgamePop(extraClass, text) {
-        const textLetters = text.split('');
+    function endgamePop(extraClass, textMain, buttonText) {
+        const textLetters = textMain.split('');
         const overlay = document.createElement('div');
         const popupBlock = document.createElement('div');
         const popupText = document.createElement('div');
@@ -190,7 +182,7 @@ function createGame({playFieldWrap, gameTime, elemsToShuffleLength}) {
         popupBlock.append(popupText);
         popupBlock.append(popupButton);
 
-        popupButton.textContent = 'Play again';
+        popupButton.textContent = buttonText;
         popupButton.addEventListener('click', repeatGame);
 
         function repeatGame() {
