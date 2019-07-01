@@ -20,9 +20,7 @@ function createGame({playFieldWrap, gameTime}) {
     main.addEventListener('losePopup', () => endgamePop('popup__lose', 'Lose'));
 
     main.addEventListener('click', cardFlip);
-    main.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') cardFlip(e);
-    });
+    main.addEventListener('keypress', keyboardFlip);
 
     function playElems(arr) {
         const elems = Array.from(new Set(arr));
@@ -31,6 +29,7 @@ function createGame({playFieldWrap, gameTime}) {
         elemsWithDoubles.sort(() => Math.random() - 0.5);
         return elemsWithDoubles;
     }
+
 
     function cardFlip(event) {
         const target = event.target;
@@ -74,28 +73,14 @@ function createGame({playFieldWrap, gameTime}) {
         }
 
         flippedCard = null;
+
+        function similarityCheck(firstCard, secondCard) {
+            return firstCard.innerText.trim() === secondCard.innerText.trim();
+        }
     }
 
-    function similarityCheck(firstCard, secondCard) {
-        return firstCard.innerText.trim() === secondCard.innerText.trim();
-    }
-
-    function createCard(cardText) {
-        const card = document.createElement('div');
-        const cardFace = document.createElement('div');
-        const cardBack = document.createElement('div');
-
-        card.classList.add('main__card', 'card');
-        card.tabIndex = 0;
-
-        cardFace.classList.add('card__face');
-        cardFace.append(cardText);
-        card.append(cardFace);
-
-        cardBack.classList.add('card__back');
-        card.append(cardBack);
-
-        return card;
+    function keyboardFlip(event) {
+        if (event.key === 'Enter' || event.key === ' ') cardFlip(e);
     }
 
     function createField(elems) {
@@ -106,6 +91,24 @@ function createGame({playFieldWrap, gameTime}) {
         elems.forEach((elem) => {
             playField.append(createCard(elem));
         });
+
+        function createCard(cardText) {
+            const card = document.createElement('div');
+            const cardFace = document.createElement('div');
+            const cardBack = document.createElement('div');
+
+            card.classList.add('main__card', 'card');
+            card.tabIndex = 0;
+
+            cardFace.classList.add('card__face');
+            cardFace.append(cardText);
+            card.append(cardFace);
+
+            cardBack.classList.add('card__back');
+            card.append(cardBack);
+
+            return card;
+        }
     }
 
     function createTimer() {
@@ -154,44 +157,54 @@ function createGame({playFieldWrap, gameTime}) {
 
     function endgamePop(extraClass, text) {
         const textLetters = text.split('');
-
         const overlay = document.createElement('div');
         const popupBlock = document.createElement('div');
         const popupText = document.createElement('div');
         const popupButton = document.createElement('button');
 
-        isGameRunning = false;
+        main.removeEventListener('click', cardFlip);
+        main.removeEventListener('keypress', keyboardFlip);
         cards.forEach(card => card.tabIndex = -1);
+        isGameRunning = false;
 
         overlay.classList.add('overlay');
-
         popupBlock.classList.add('popup', extraClass);
-
         popupText.classList.add('popup__text');
-        popupBlock.append(popupText);
+        popupButton.classList.add('popup__button', 'button');
 
         textLetters.forEach(letter => {
             const popupLetter = document.createElement('span');
+
             popupLetter.classList.add('popup__letter');
             popupLetter.textContent = letter;
             popupText.append(popupLetter);
         });
 
-        popupButton.classList.add('popup__button', 'button', 'js-replay');
-        popupButton.textContent = 'Play again';
-        popupBlock.append(popupButton);
-        popupButton.addEventListener('click', repeatGame);
-
         main.append(overlay);
         overlay.append(popupBlock);
+        popupBlock.append(popupText);
+        popupBlock.append(popupButton);
 
+        popupButton.textContent = 'Play again';
+        popupButton.addEventListener('click', repeatGame);
+
+        function repeatGame() {
+            const mainClone = main.cloneNode(false);
+            const flippedCards = cards.filter(card => card.classList.contains('card--flipped'));
+
+            overlay.remove();
+
+            flippedCards[0].addEventListener('transitionend', updateField);
+
+            flippedCards.forEach(card => {
+                card.classList.remove('card--flipped');
+            });
+
+            function updateField() {
+                main.parentElement.replaceChild(mainClone, main);
+                createGame({playFieldWrap: playFieldWrap, gameTime: gameTime});
+            }
+        }
     }
 
-    function repeatGame() {
-        const mainClone = main.cloneNode(false);
-
-        main.parentElement.replaceChild(mainClone, main);
-        createGame({playFieldWrap: playFieldWrap, gameTime: gameTime});
-
-    }
 }
